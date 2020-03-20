@@ -33,3 +33,13 @@ cc_library_shared {
     header_libs: ["libcutils_headers"],
     srcs: ["rk_wifi_ctrl.cpp"],
 }
+cc_library_static {
+    name: "librkwifi-ctrl-static",
+    recovery_available: true,
+    cflags: wifi_hal_cflags,
+    local_include_dirs: ["include"],
+    export_include_dirs: ["include"],
+    shared_libs: ["libbase"],
+    header_libs: ["libcutils_headers"],
+    srcs: ["rk_wifi_ctrl.cpp"],
+}
