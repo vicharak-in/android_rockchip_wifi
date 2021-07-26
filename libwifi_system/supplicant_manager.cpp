@@ -100,6 +100,7 @@ bool SupplicantManager::StopSupplicant() {
   property_set("ctl.stop", kSupplicantServiceName);
   sched_yield();
 
+  usleep(200000);
   while (count-- > 0) {
     if (property_get(kSupplicantInitProperty, supp_status, NULL)) {
       if (strcmp(supp_status, "stopped") == 0) return true;

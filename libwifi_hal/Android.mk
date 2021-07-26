@@ -71,7 +71,7 @@ LOCAL_LICENSE_KINDS := SPDX-license-identifier-Apache-2.0
 LOCAL_LICENSE_CONDITIONS := notice
 LOCAL_VENDOR_MODULE := true
 LOCAL_CFLAGS := $(wifi_hal_cflags)
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include system/core/include
 LOCAL_SHARED_LIBRARIES := libbase
 LOCAL_HEADER_LIBRARIES := libcutils_headers
 LOCAL_SRC_FILES := wifi_hal_common.cpp
@@ -144,6 +144,7 @@ LOCAL_SHARED_LIBRARIES := \
     liblog \
     libnl \
     libutils \
+    librkwifi-ctrl \
     $(VENDOR_LOCAL_SHARED_LIBRARIES)
 LOCAL_SRC_FILES := \
     driver_tool.cpp \
