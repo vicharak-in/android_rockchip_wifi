@@ -47,6 +47,7 @@ extern "C" int delete_module(const char *, unsigned int);
 #define SSV6051_DRIVER_MODULE_PATH  	 WIFI_MODULE_PATH"ssv6051.ko"
 #define ESP8089_DRIVER_MODULE_PATH  	 WIFI_MODULE_PATH"esp8089.ko"
 #define BCM_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"bcmdhd.ko"
+#define BCM_STATIC_BUF_MODULE_PATH	 WIFI_MODULE_PATH"dhd_static_buf.ko"
 #define MLAN_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"mlan.ko"
 #define MVL_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"sd8xxx.ko"
 #define RK912_DRIVER_MODULE_PATH         WIFI_MODULE_PATH"rk912.ko"
@@ -379,6 +380,10 @@ int wifi_load_driver() {
 
 	if (strstr(wifi_ko_path, MVL_DRIVER_MODULE_NAME)) {
 		insmod(MLAN_DRIVER_MODULE_PATH, "");
+	}
+
+	if (strstr(wifi_ko_path, BCM_DRIVER_MODULE_NAME)) {
+		insmod(BCM_STATIC_BUF_MODULE_PATH, "");
 	}
 
   if (insmod(wifi_ko_path, wifi_ko_arg) < 0) {
