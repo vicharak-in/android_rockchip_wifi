@@ -125,6 +125,10 @@ endif
   endif
 endif
 
+ifeq ($(BOARD_WLAN_DEVICE), auto)
+LIB_WIFI_HAL := libwifi-hal-auto
+endif
+
 # The WiFi HAL that you should be linking.
 # ============================================================
 include $(CLEAR_VARS)

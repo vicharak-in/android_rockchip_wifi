@@ -23,6 +23,10 @@ extern "C"
 #endif /* __cplusplus */
 
 int check_wifi_chip_type_string(char *type);
+const char *get_wifi_driver_name(void);
+const char *get_wifi_module_path(void);
+const char *get_wifi_module_arg(void);
+const char *get_wifi_hal_name(void);
 
 #ifdef __cplusplus
 }
