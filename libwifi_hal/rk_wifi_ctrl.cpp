@@ -39,12 +39,83 @@ static const char PREFIX_PCIE[] = "PCI_ID=";
 static const char PREFIX_USB[] = "PRODUCT=";
 
 static int invalid_wifi_device_id = -1;
+static char wifi_type[64] = {0};
+
+#define WIFI_MODULE_PATH                "/vendor/lib/modules/"
+#define RTL8188EU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8188eu.ko"
+#define RTL8723BU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8723bu.ko"
+#define RTL8723BS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8723bs.ko"
+#define RTL8723BS_VQ0_DRIVER_MODULE_PATH WIFI_MODULE_PATH"8723bs-vq0.ko"
+#define RTL8723CS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8723cs.ko"
+#define RTL8723DS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8723ds.ko"
+#define RTL8188FU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8188fu.ko"
+#define RTL8822BU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8822bu.ko"
+#define RTL8822BS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8822bs.ko"
+#define RTL8189ES_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8189es.ko"
+#define RTL8189FS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8189fs.ko"
+#define RTL8192DU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8192du.ko"
+#define RTL8812AU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8812au.ko"
+#define RTL8822BE_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8822be.ko"
+#define RTL8821CS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8821cs.ko"
+#define RTL8822CU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8822cu.ko"
+#define RTL8822CS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8822cs.ko"
+#define SSV6051_DRIVER_MODULE_PATH       WIFI_MODULE_PATH"ssv6051.ko"
+#define ESP8089_DRIVER_MODULE_PATH       WIFI_MODULE_PATH"esp8089.ko"
+#define BCM_DRIVER_MODULE_PATH           WIFI_MODULE_PATH"bcmdhd.ko"
+#define MLAN_DRIVER_MODULE_PATH          WIFI_MODULE_PATH"mlan.ko"
+#define MVL_DRIVER_MODULE_PATH           WIFI_MODULE_PATH"sd8xxx.ko"
+#define RK912_DRIVER_MODULE_PATH         WIFI_MODULE_PATH"rk912.ko"
+#define SPRDWL_DRIVER_MODULE_PATH        WIFI_MODULE_PATH"sprdwl_ng.ko"
+#define BES2600_DRIVER_MODULE_PATH        WIFI_MODULE_PATH"bes2600.ko"
+
+#define RTL8188EU_DRIVER_MODULE_NAME     "8188eu"
+#define RTL8723BU_DRIVER_MODULE_NAME     "8723bu"
+#define RTL8723BS_DRIVER_MODULE_NAME     "8723bs"
+#define RTL8723BS_VQ0_DRIVER_MODULE_NAME "8723bs-vq0"
+#define RTL8723CS_DRIVER_MODULE_NAME     "8723cs"
+#define RTL8723DS_DRIVER_MODULE_NAME     "8723ds"
+#define RTL8188FU_DRIVER_MODULE_NAME     "8188fu"
+#define RTL8822BU_DRIVER_MODULE_NAME     "8822bu"
+#define RTL8822BS_DRIVER_MODULE_NAME     "8822bs"
+#define RTL8189ES_DRIVER_MODULE_NAME     "8189es"
+#define RTL8189FS_DRIVER_MODULE_NAME     "8189fs"
+#define RTL8192DU_DRIVER_MODULE_NAME     "8192du"
+#define RTL8812AU_DRIVER_MODULE_NAME     "8812au"
+#define RTL8822BE_DRIVER_MODULE_NAME     "8822be"
+#define RTL8821CS_DRIVER_MODULE_NAME     "8821cs"
+#define RTL8822CU_DRIVER_MODULE_NAME     "8822cu"
+#define RTL8822CS_DRIVER_MODULE_NAME     "8822cs"
+#define SSV6051_DRIVER_MODULE_NAME       "ssv6051"
+#define ESP8089_DRIVER_MODULE_NAME       "esp8089"
+#define BCM_DRIVER_MODULE_NAME           "bcmdhd"
+#define MVL_DRIVER_MODULE_NAME           "sd8xxx"
+#define RK912_DRIVER_MODULE_NAME         "rk912"
+#define SPRDWL_DRIVER_MODULE_NAME        "sprdwl"
+#define BES2600_DRIVER_MODULE_NAME       "bes2600"
+
+#define UNKOWN_DRIVER_MODULE_ARG ""
+#define SSV6051_DRIVER_MODULE_ARG "stacfgpath=/vendor/etc/firmware/ssv6051-wifi.cfg"
+#define MVL88W8977_DRIVER_MODULE_ARG "drv_mode=1 fw_name=mrvl/sd8977_wlan_v2.bin cal_data_cfg=none cfg80211_wext=0xf"
+
+#define BROADCOM_WIFI_HAL "libwifi-hal-bcm.so"
+#define REALTEK_WIFI_HAL "libwifi-hal-rtk.so"
+#define SPRD_WIFI_HAL "libwifi-hal-sprd.so"
+#define BES_WIFI_HAL "libwifi-hal-bes.so"
 
 typedef struct _wifi_devices
 {
   char wifi_name[64];
   char wifi_vid_pid[64];
 } wifi_device;
+
+typedef struct _wifi_file_name
+{
+  char wifi_name[64];
+  char wifi_driver_name[64];
+  char wifi_module_path[128];
+  char wifi_module_arg[128];
+  char wifi_hal_name[64];
+}wifi_file_name;
 
 static wifi_device supported_wifi_devices[] = {
 	{"RTL8188EU",	"0bda:8179"},
@@ -61,6 +132,8 @@ static wifi_device supported_wifi_devices[] = {
 	{"RTL8192DU",	"0bda:8194"},
 	{"RTL8812AU",	"0bda:8812"},
 	{"RTL8821CS",	"024c:c821"},
+        {"RTL8822CU",   "0bda:c82c"},
+	{"RTL8822CS",   "024c:c822"},
 	{"SSV6051",	"3030:3030"},
 	{"ESP8089",	"6666:1111"},
 	{"AP6354",	"02d0:4354"},
@@ -71,6 +144,38 @@ static wifi_device supported_wifi_devices[] = {
 	{"RTL8822BE",	"10ec:b822"},
 	{"MVL88W8977",	"02df:9145"},
 	{"SPRDWL",	"0000:0000"},
+};
+
+const wifi_file_name module_list[] =
+{
+	{"RTL8723BU", RTL8723BU_DRIVER_MODULE_NAME, RTL8723BU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8188EU", RTL8188EU_DRIVER_MODULE_NAME, RTL8188EU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8192DU", RTL8192DU_DRIVER_MODULE_NAME, RTL8192DU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8822BU", RTL8822BU_DRIVER_MODULE_NAME, RTL8822BU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8822BS", RTL8822BS_DRIVER_MODULE_NAME, RTL8822BS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8188FU", RTL8188FU_DRIVER_MODULE_NAME, RTL8188FU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8189ES", RTL8189ES_DRIVER_MODULE_NAME, RTL8189ES_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8723BS", RTL8723BS_DRIVER_MODULE_NAME, RTL8723BS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8723CS", RTL8723CS_DRIVER_MODULE_NAME, RTL8723CS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8723DS", RTL8723DS_DRIVER_MODULE_NAME, RTL8723DS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8812AU", RTL8812AU_DRIVER_MODULE_NAME, RTL8812AU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8189FS", RTL8189FS_DRIVER_MODULE_NAME, RTL8189FS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8822BE", RTL8822BE_DRIVER_MODULE_NAME, RTL8822BE_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8821CS", RTL8821CS_DRIVER_MODULE_NAME, RTL8821CS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8822CU", RTL8822CU_DRIVER_MODULE_NAME, RTL8822CU_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"RTL8822CS", RTL8822CS_DRIVER_MODULE_NAME, RTL8822CS_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, REALTEK_WIFI_HAL},
+	{"SSV6051",     SSV6051_DRIVER_MODULE_NAME,   SSV6051_DRIVER_MODULE_PATH, SSV6051_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"ESP8089",     ESP8089_DRIVER_MODULE_NAME,   ESP8089_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"AP6335",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"AP6330",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"AP6354",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"AP6356S",         BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"AP6255",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"APXXX",           BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"MVL88W8977",      MVL_DRIVER_MODULE_NAME,       MVL_DRIVER_MODULE_PATH, MVL88W8977_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"RK912",         RK912_DRIVER_MODULE_NAME,     RK912_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
+	{"SPRDWL",          SPRDWL_DRIVER_MODULE_NAME, SPRDWL_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, SPRD_WIFI_HAL},
+	{"BES2600",          BES2600_DRIVER_MODULE_NAME, BES2600_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BES_WIFI_HAL},
 };
 
 int get_wifi_device_id(const char *bus_dir, const char *prefix)
@@ -158,4 +263,61 @@ int check_wifi_chip_type_string(char *type)
 	strcpy(type, recoginze_wifi_chip);
 	PLOG(ERROR) << "check_wifi_chip_type_string : " << type;
 	return 0;
+}
+
+const char *get_wifi_driver_name(void)
+{
+	if (wifi_type[0] == 0) {
+		check_wifi_chip_type_string(wifi_type);
+	}
+	for (int i = 0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
+		if (strncmp(wifi_type, module_list[i].wifi_name, strlen(wifi_type)) == 0) {
+			PLOG(ERROR) << "matched wifi_driver_name: " << module_list[i].wifi_driver_name;
+			return module_list[i].wifi_driver_name;
+		}
+	}
+	return NULL;
+}
+
+const char *get_wifi_module_path(void)
+{
+	if (wifi_type[0] == 0) {
+		check_wifi_chip_type_string(wifi_type);
+	}
+
+	for (int i = 0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
+		if (strncmp(wifi_type, module_list[i].wifi_name, strlen(wifi_type)) == 0) {
+			PLOG(ERROR) << "matched wifi_module_path: " << module_list[i].wifi_module_path;
+			return module_list[i].wifi_module_path;
+		}
+	}
+	return NULL;
+}
+
+const char *get_wifi_module_arg(void)
+{
+	if (wifi_type[0] == 0) {
+		check_wifi_chip_type_string(wifi_type);
+	}
+	for (int i = 0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
+		if (strncmp(wifi_type, module_list[i].wifi_name, strlen(wifi_type)) == 0) {
+			PLOG(ERROR) << "matched wifi_module_arg: " << module_list[i].wifi_module_arg;
+			return module_list[i].wifi_module_arg;
+		}
+	}
+	return NULL;
+}
+
+const char *get_wifi_hal_name(void)
+{
+	if (wifi_type[0] == 0) {
+		check_wifi_chip_type_string(wifi_type);
+	}
+	for (int i = 0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
+		if (strncmp(wifi_type, module_list[i].wifi_name, strlen(wifi_type)) == 0) {
+			PLOG(ERROR) << "matched wifi_hal_name: " << module_list[i].wifi_hal_name;
+			return module_list[i].wifi_hal_name;
+		}
+	}
+	return NULL;
 }

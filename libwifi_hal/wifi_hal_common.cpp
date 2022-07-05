@@ -15,6 +15,7 @@
  */
 
 #include "hardware_legacy/wifi.h"
+#include "hardware_legacy/rk_wifi.h"
 
 #include <fcntl.h>
 #include <stdlib.h>
@@ -28,54 +29,11 @@
 
 extern "C" int init_module(void *, unsigned long, const char *);
 extern "C" int delete_module(const char *, unsigned int);
-#define WIFI_MODULE_PATH		"/vendor/lib/modules/"
-#define RTL8188EU_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8188eu.ko"
-#define RTL8723BU_DRIVER_MODULE_PATH 	 WIFI_MODULE_PATH"8723bu.ko"
-#define RTL8723BS_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8723bs.ko"
-#define RTL8723BS_VQ0_DRIVER_MODULE_PATH WIFI_MODULE_PATH"8723bs-vq0.ko"
-#define RTL8723CS_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8723cs.ko"
-#define RTL8723DS_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8723ds.ko"
-#define RTL8188FU_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8188fu.ko"
-#define RTL8822BU_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8822bu.ko"
-#define RTL8822BS_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8822bs.ko"
-#define RTL8189ES_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8189es.ko"
-#define RTL8189FS_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8189fs.ko"
-#define RTL8192DU_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8192du.ko"
-#define RTL8812AU_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8812au.ko"
-#define RTL8822BE_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"8822be.ko"
-#define RTL8821CS_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8821cs.ko"
-#define SSV6051_DRIVER_MODULE_PATH  	 WIFI_MODULE_PATH"ssv6051.ko"
-#define ESP8089_DRIVER_MODULE_PATH  	 WIFI_MODULE_PATH"esp8089.ko"
-#define BCM_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"bcmdhd.ko"
+#define WIFI_MODULE_PATH                "/vendor/lib/modules/"
+#define MLAN_DRIVER_MODULE_PATH          WIFI_MODULE_PATH"mlan.ko"
 #define BCM_STATIC_BUF_MODULE_PATH	 WIFI_MODULE_PATH"dhd_static_buf.ko"
-#define MLAN_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"mlan.ko"
-#define MVL_DRIVER_MODULE_PATH      	 WIFI_MODULE_PATH"sd8xxx.ko"
-#define RK912_DRIVER_MODULE_PATH         WIFI_MODULE_PATH"rk912.ko"
-#define SPRDWL_DRIVER_MODULE_PATH	 WIFI_MODULE_PATH"sprdwl_ng.ko"
-#define DRIVER_MODULE_PATH_UNKNOW   	 ""
-
-#define RTL8188EU_DRIVER_MODULE_NAME	 "8188eu"
-#define RTL8723BU_DRIVER_MODULE_NAME	 "8723bu"
-#define RTL8723BS_DRIVER_MODULE_NAME	 "8723bs"
-#define RTL8723BS_VQ0_DRIVER_MODULE_NAME "8723bs-vq0"
-#define RTL8723CS_DRIVER_MODULE_NAME	 "8723cs"
-#define RTL8723DS_DRIVER_MODULE_NAME	 "8723ds"
-#define RTL8188FU_DRIVER_MODULE_NAME	 "8188fu"
-#define RTL8822BU_DRIVER_MODULE_NAME	 "8822bu"
-#define RTL8822BS_DRIVER_MODULE_NAME	 "8822bs"
-#define RTL8189ES_DRIVER_MODULE_NAME	 "8189es"
-#define RTL8189FS_DRIVER_MODULE_NAME	 "8189fs"
-#define RTL8192DU_DRIVER_MODULE_NAME	 "8192du"
-#define RTL8812AU_DRIVER_MODULE_NAME	 "8812au"
-#define RTL8822BE_DRIVER_MODULE_NAME	 "8822be"
-#define RTL8821CS_DRIVER_MODULE_NAME	 "8821cs"
-#define SSV6051_DRIVER_MODULE_NAME  	 "ssv6051"
-#define ESP8089_DRIVER_MODULE_NAME  	 "esp8089"
-#define BCM_DRIVER_MODULE_NAME      	 "bcmdhd"
-#define MVL_DRIVER_MODULE_NAME      	 "sd8xxx"
-#define RK912_DRIVER_MODULE_NAME         "rk912"
-#define SPRDWL_DRIVER_MODULE_NAME	 "sprdwl"
-#define DRIVER_MODULE_NAME_UNKNOW   	 ""
+#define MVL_DRIVER_MODULE_NAME           "sd8xxx"
+#define BCM_DRIVER_MODULE_NAME           "bcmdhd"
 
 #ifndef WIFI_DRIVER_FW_PATH_STA
 #define WIFI_DRIVER_FW_PATH_STA NULL
@@ -117,50 +75,6 @@ enum {
     KERNEL_VERSION_4_4,
     KERNEL_VERSION_4_19,
     KERNEL_VERSION_5_10,
-};
-
-typedef struct _wifi_ko_file_name
-{
-	char wifi_name[64];
-	char wifi_driver_name[64];
-	char wifi_module_path[128];
-	char wifi_module_arg[128];
-
-}wifi_ko_file_name;
-
-#define UNKKOWN_DRIVER_MODULE_ARG ""
-#define SSV6051_DRIVER_MODULE_ARG "stacfgpath=/vendor/etc/firmware/ssv6051-wifi.cfg"
-#define MVL88W8977_DRIVER_MODULE_ARG "drv_mode=1 fw_name=mrvl/sd8977_wlan_v2.bin cal_data_cfg=none cfg80211_wext=0xf"
-
-wifi_ko_file_name module_list[] =
-{
-	{"RTL8723BU", RTL8723BU_DRIVER_MODULE_NAME, RTL8723BU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8188EU", RTL8188EU_DRIVER_MODULE_NAME, RTL8188EU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8192DU", RTL8192DU_DRIVER_MODULE_NAME, RTL8192DU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8822BU", RTL8822BU_DRIVER_MODULE_NAME, RTL8822BU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8822BS", RTL8822BS_DRIVER_MODULE_NAME, RTL8822BS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8188FU", RTL8188FU_DRIVER_MODULE_NAME, RTL8188FU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8189ES", RTL8189ES_DRIVER_MODULE_NAME, RTL8189ES_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8723BS", RTL8723BS_DRIVER_MODULE_NAME, RTL8723BS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8723CS", RTL8723CS_DRIVER_MODULE_NAME, RTL8723CS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8723DS", RTL8723DS_DRIVER_MODULE_NAME, RTL8723DS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8812AU", RTL8812AU_DRIVER_MODULE_NAME, RTL8812AU_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8189FS", RTL8189FS_DRIVER_MODULE_NAME, RTL8189FS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8822BE", RTL8822BE_DRIVER_MODULE_NAME, RTL8822BE_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"RTL8821CS", RTL8821CS_DRIVER_MODULE_NAME, RTL8821CS_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"SSV6051",     SSV6051_DRIVER_MODULE_NAME,   SSV6051_DRIVER_MODULE_PATH, SSV6051_DRIVER_MODULE_ARG},
-	{"ESP8089",     ESP8089_DRIVER_MODULE_NAME,   ESP8089_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"AP6335",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"AP6330",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"AP6354",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"AP6356S",         BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"AP6255",          BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"APXXX",           BCM_DRIVER_MODULE_NAME,       BCM_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"MVL88W8977",      MVL_DRIVER_MODULE_NAME,       MVL_DRIVER_MODULE_PATH, MVL88W8977_DRIVER_MODULE_ARG},
-        {"RK912",         RK912_DRIVER_MODULE_NAME,     RK912_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"SPRDWL",	    SPRDWL_DRIVER_MODULE_NAME, SPRDWL_DRIVER_MODULE_PATH, UNKKOWN_DRIVER_MODULE_ARG},
-	{"UNKNOW",       DRIVER_MODULE_NAME_UNKNOW,    DRIVER_MODULE_PATH_UNKNOW, UNKKOWN_DRIVER_MODULE_ARG}
-
 };
 
 static char wifi_type[64] = {0};
@@ -355,23 +269,11 @@ if (check_wireless_ready() == 0) {
 
 int wifi_load_driver() {
 #ifdef WIFI_DRIVER_MODULE_PATH
-	char* wifi_ko_path = NULL ;
-	char* wifi_ko_arg =NULL;
-	int i = 0;
+	const char* wifi_ko_path = get_wifi_module_path();
+	const char* wifi_ko_arg = get_wifi_module_arg();
 	int count = 100;
 	if (is_wifi_driver_loaded()) {
 		return 0;
-	}
-	if (wifi_type[0] == 0) {
-		check_wifi_chip_type_string(wifi_type);
-	}
-	for (i=0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
-		if (!strcmp(wifi_type , module_list[i].wifi_name)) {
-			wifi_ko_path = module_list[i].wifi_module_path;
-			wifi_ko_arg = module_list[i].wifi_module_arg;
-			PLOG(ERROR) << "matched ko file path " << wifi_ko_path;
-			break;
-		}
 	}
 	if (wifi_ko_path == NULL) {
 		PLOG(ERROR) << "falied to find wifi driver for type=" << wifi_type;
@@ -418,18 +320,7 @@ int wifi_unload_driver() {
 
   usleep(200000); /* allow to finish interface down */
 #ifdef WIFI_DRIVER_MODULE_PATH
-  char* wifi_ko_name = NULL ;
-  int i = 0;
-  if (wifi_type[0] == 0) {
-	check_wifi_chip_type_string(wifi_type);
-  }
-  for (i=0; i< (int)(sizeof(module_list) / sizeof(module_list[0])); i++) {
-	if (!strcmp(wifi_type , module_list[i].wifi_name)) {
-		wifi_ko_name = module_list[i].wifi_driver_name;
-		PLOG(ERROR) << "matched ko file name " << wifi_ko_name;
-		break;
-	}
-  }
+  const char* wifi_ko_name = get_wifi_driver_name();
   if (rmmod(wifi_ko_name) == 0) {
     int count = 20; /* wait at most 10 seconds for completion */
     while (count-- > 0) {
