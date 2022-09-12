@@ -32,6 +32,8 @@ extern "C" int delete_module(const char *, unsigned int);
 #define WIFI_MODULE_PATH                "/vendor/lib/modules/"
 #define MLAN_DRIVER_MODULE_PATH          WIFI_MODULE_PATH"mlan.ko"
 #define BCM_STATIC_BUF_MODULE_PATH	 WIFI_MODULE_PATH"dhd_static_buf.ko"
+#define RTL8852BE_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8852be.ko"
+#define RTL8852BU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8852bu.ko"
 #define MVL_DRIVER_MODULE_NAME           "sd8xxx"
 #define BCM_DRIVER_MODULE_NAME           "bcmdhd"
 
