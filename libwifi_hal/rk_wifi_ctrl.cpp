@@ -69,6 +69,7 @@ static char wifi_type[64] = {0};
 #define RK912_DRIVER_MODULE_PATH         WIFI_MODULE_PATH"rk912.ko"
 #define SPRDWL_DRIVER_MODULE_PATH        WIFI_MODULE_PATH"sprdwl_ng.ko"
 #define BES2600_DRIVER_MODULE_PATH        WIFI_MODULE_PATH"bes2600.ko"
+#define AX210_DRIVER_MODULE_PATH        WIFI_MODULE_PATH"iwlwifi.ko"
 
 #define RTL8188EU_DRIVER_MODULE_NAME     "8188eu"
 #define RTL8723BU_DRIVER_MODULE_NAME     "8723bu"
@@ -96,6 +97,7 @@ static char wifi_type[64] = {0};
 #define RK912_DRIVER_MODULE_NAME         "rk912"
 #define SPRDWL_DRIVER_MODULE_NAME        "sprdwl"
 #define BES2600_DRIVER_MODULE_NAME       "bes2600"
+#define AX210_DRIVER_MODULE_NAME   "ax210"
 
 #define UNKOWN_DRIVER_MODULE_ARG ""
 #define SSV6051_DRIVER_MODULE_ARG "stacfgpath=/vendor/etc/firmware/ssv6051-wifi.cfg"
@@ -151,6 +153,7 @@ static wifi_device supported_wifi_devices[] = {
 	{"RTL8822BE",	"10ec:b822"},
 	{"MVL88W8977",	"02df:9145"},
 	{"SPRDWL",	"0000:0000"},
+	{"AX210",	"8086:2725"},
 };
 
 const wifi_file_name module_list[] =
@@ -186,6 +189,8 @@ const wifi_file_name module_list[] =
 	{"RK912",         RK912_DRIVER_MODULE_NAME,     RK912_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
 	{"SPRDWL",          SPRDWL_DRIVER_MODULE_NAME, SPRDWL_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, SPRD_WIFI_HAL},
 	{"BES2600",          BES2600_DRIVER_MODULE_NAME, BES2600_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BES_WIFI_HAL},
+	{"BES2600",          BES2600_DRIVER_MODULE_NAME, BES2600_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BES_WIFI_HAL},
+	{"AX210",          AX210_DRIVER_MODULE_NAME, AX210_DRIVER_MODULE_PATH, UNKOWN_DRIVER_MODULE_ARG, BROADCOM_WIFI_HAL},
 };
 
 int get_wifi_device_id(const char *bus_dir, const char *prefix)

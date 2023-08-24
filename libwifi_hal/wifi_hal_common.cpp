@@ -34,8 +34,11 @@ extern "C" int delete_module(const char *, unsigned int);
 #define BCM_STATIC_BUF_MODULE_PATH	 WIFI_MODULE_PATH"dhd_static_buf.ko"
 #define RTL8852BE_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8852be.ko"
 #define RTL8852BU_DRIVER_MODULE_PATH     WIFI_MODULE_PATH"8852bu.ko"
+#define INTEL_MVM_FIRMWARE_DRIVER_PATH     WIFI_MODULE_PATH"iwlmvm.ko"
+#define INTEL_DVM_FIRMWARE_DRIVER_PATH     WIFI_MODULE_PATH"iwldvm.ko"
 #define MVL_DRIVER_MODULE_NAME           "sd8xxx"
 #define BCM_DRIVER_MODULE_NAME           "bcmdhd"
+#define INTEL_DRIVER_MODULE_NAME           "iwlwifi"
 
 #ifndef WIFI_DRIVER_FW_PATH_STA
 #define WIFI_DRIVER_FW_PATH_STA NULL
@@ -293,6 +296,13 @@ int wifi_load_driver() {
   if (insmod(wifi_ko_path, wifi_ko_arg) < 0) {
 	  return -1;
   }
+
+	if (strstr(wifi_ko_path, INTEL_DRIVER_MODULE_NAME)) {
+		if(insmod(INTEL_MVM_FIRMWARE_DRIVER_PATH, wifi_ko_arg) < 0)
+            PLOG(ERROR) << "falied load intel mvm firmware";
+		if(insmod(INTEL_DVM_FIRMWARE_DRIVER_PATH, wifi_ko_arg) < 0)
+            PLOG(ERROR) << "falied load intel dvm firmware"; 
+	}
 #endif
 
 #ifdef WIFI_DRIVER_STATE_CTRL_PARAM
